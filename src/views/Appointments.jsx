@@ -4,14 +4,17 @@ import Appointment from "../components/Appointment";
 import useSWR from "swr";
 import {fetcher} from "../hooks/Fetcher";
 import Spinner from "../components/Spinner";
+import { useEffect } from "react";
 
 export default function Appointments() {
-    let appointments;
+    const {handleSetAppointment, handleClickModalAppointment, deleteData, handleSetPet, handleSetUrl, url} = useAmorPorTi()
+    useEffect(() => {
+        handleSetUrl('api/appointments');
+    },[handleSetUrl]);
     const {data: appointmentsData, error: appointmentsDataError, isLoading} = useSWR(
-        'api/appointments', fetcher
+        url, fetcher
     );
-    appointments = appointmentsData ? appointmentsData.data : [];
-    const {handleSetAppointment, handleClickModalAppointment, deleteAppointment, handleSetPet} = useAmorPorTi()
+    let appointments = appointmentsData ? appointmentsData.data : [];
     const hasAppointments = Object.values(appointments).length > 0;
     if(isLoading) return(<Spinner />)
     return (
@@ -35,9 +38,10 @@ export default function Appointments() {
                                             key={appointment.id}
                                             appointment={appointment}
                                             modalAppointment={{handleClickModalAppointment}}
-                                            deleteApp={{deleteAppointment}}
+                                            deleteApp={{deleteData}}
                                             setAppointment={{handleSetAppointment}}
                                             setPet={{handleSetPet}}
+                                            setUrl={{url}}
                                         />
                                     ))}
                                 </tbody>

@@ -85,79 +85,6 @@ const AmorPorTiProvider = ({children}) => {
         }
     }
     /**********************************************************************************************************************************/
-    /***********************************************Area Consultas*********************************************************************/
-    const createAppointment = async ({setErrors, id = null, ...props}) => {
-        const token = localStorage.getItem('AUTH_TOKEN');
-        if(token){
-            try {
-                const {data} = await clienteAxios.post('api/appointments', {...props, user_id: id},
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                })
-                setErrors([])
-                await mutate('api/appointments')
-                handleCloseModalAppointment()
-                toast.success(data.message)
-            } catch (error) {
-                if(error.response.data.errors.error){
-                    handleCloseModalAppointment();
-                    toast.error(error.response.data.errors.error[0])
-                }else {
-                    setErrors(error.response.data.errors);
-                }
-            }
-        }
-    }
-    const updateAppointment = async (id, setErrors, date, hour, reason) => {
-        const token = localStorage.getItem('AUTH_TOKEN');
-        if(token){
-            try {
-                const {data} = await clienteAxios.patch(`api/appointments/${id}`,
-                {
-                    date,
-                    hour_id: hour,
-                    reason
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                })
-                setErrors([])
-                await mutate('api/appointments')
-                //cerrar el modal
-                handleCloseModalAppointment()
-                toast.success(data.message)
-            } catch (error) {
-                if(error.response.data.errors.error){
-                    handleCloseModalAppointment();
-                    toast.error(error.response.data.errors.error[0])
-                }else {
-                    setErrors(error.response.data.errors);
-                }
-            }
-        }
-    }
-    const deleteAppointment = async id => {
-        const token = localStorage.getItem('AUTH_TOKEN');
-        if(token) {
-            try {
-                const {data} = await clienteAxios.delete(`api/appointments/${id}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                })
-                await mutate('api/appointments')
-                toast.success(data.message)
-            } catch (error) {
-                console.log(error)
-            }
-        }
-    } 
-    /**********************************************************************************************************************************/
     /***********************************************Area Historias Clinicas************************************************************/
     const createMedicalHistory = async (appointment_id, pet_id, reasonConsult, observations, food, frequencyFood, previous_treatments, surgical_procedures, setErrors) =>{
         if(localStorage.getItem('AUTH_TOKEN')){
@@ -289,9 +216,6 @@ const AmorPorTiProvider = ({children}) => {
                 updateData,
                 deleteData,
                 handleSetPet,
-                createAppointment,
-                updateAppointment,
-                deleteAppointment,
                 appointment,
                 handleSetAppointment,
                 handleClickModalAppointment,

@@ -4,9 +4,13 @@ import { useState } from "react";
 import useSWR from "swr";
 import { fetcher } from "../../hooks/Fetcher";
 import Spinner from "../../components/Spinner";
+import { useEffect } from "react";
+
 export default function AppointmentsAdmin() {
-    const {handleSetAppointment, handleClickModalAppointment, deleteAppointment, handleSetPet} = useAmorPorTi()
-    let availableAppointments;
+    const {handleSetAppointment, handleClickModalAppointment, deleteData, handleSetPet, handleSetUrl, url} = useAmorPorTi()
+    useEffect(() => {
+        handleSetUrl('api/appointments');
+    },[handleSetUrl]);
     // to get current Date ISOformat (yyyy-mm-dd)
     const today = new Date().toISOString().split('T')[0];
     //hooks
@@ -19,7 +23,7 @@ export default function AppointmentsAdmin() {
         refreshInterval: 1000
        }
     );
-    availableAppointments = availableAppointmentsData ? availableAppointmentsData.data : [];
+    let availableAppointments = availableAppointmentsData ? availableAppointmentsData.data : [];
     const hasAppointments = Object.values(availableAppointments).length > 0;
 
     if(isLoading) return(<Spinner />)
@@ -64,9 +68,10 @@ export default function AppointmentsAdmin() {
                                             key={appointment.id}
                                             appointment={appointment}
                                             modalAppointment={{handleClickModalAppointment}}
-                                            deleteApp={{deleteAppointment}}
+                                            deleteApp={{deleteData}}
                                             setAppointment={{handleSetAppointment}}
                                             setPet={{handleSetPet}}
+                                            setUrl={{url}}
                                         />
                                     ))}
                                 </tbody>

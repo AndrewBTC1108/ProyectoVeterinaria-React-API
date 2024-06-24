@@ -98,11 +98,10 @@ export default function ModalPet({isEditing = false}) {
         } else {
             const id = user.admin ? userId : user.id; 
             const success = await createData({
-                userId: id,
                 ...formData,
                 species: selectedSpecies,
                 setErrors,
-                urlAx: user.admin ? `api/pets?user_id=${userId}` : 'api/pets'
+                urlAx: user.admin ? `api/pets?user_id=${id}` : 'api/pets'
             });
             if (success) handleCloseModalPet();
         }

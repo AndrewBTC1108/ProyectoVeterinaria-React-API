@@ -1,14 +1,30 @@
 import { Link } from "react-router-dom";
 import {useAuth} from "../hooks/useAuth"
-export default function Appointment({appointment, modalAppointment, setAppointment, deleteApp, setPet}) {
+export default function Appointment({appointment, modalAppointment, setAppointment, deleteApp, setPet, setUrl}) {
     const {user} = useAuth({});
-    const {pet_id, date, hour_id, user_id} = appointment
+    // Destructuring del objeto appointment con valores por defecto
+    const {
+        id,
+        pet_id: { name: petName } = {},  // Destructuring con valor por defecto
+        date,
+        hour_id: { hour } = {},  // Destructuring con valor por defecto
+        user_id: { name: userName } = {}  // Destructuring con valor por defecto
+    } = appointment;
     const {handleClickModalAppointment} = modalAppointment
-    const {deleteAppointment} = deleteApp
+    const {deleteData} = deleteApp
     const {handleSetAppointment} = setAppointment
     const {handleSetPet} = setPet
+    const {url} = setUrl;
     let button;
     let button2;
+
+    //to delete
+    const handleDelete = () => {
+        deleteData({
+            urlAx: `api/appointments/${id}`, 
+            urlD: url
+        });
+    }  
 
     if (!user.doctor || user.admin) {
         button = (
@@ -23,7 +39,7 @@ export default function Appointment({appointment, modalAppointment, setAppointme
 
         button2 = (
             <button
-                onClick={() => deleteAppointment(appointment.id)} 
+                onClick={handleDelete} 
                 className="bg-red-500 hover:bg-red-800 text-white px-2 py-1 rounded ml-2"
             >Cancelar</button>
         );
@@ -47,9 +63,15 @@ export default function Appointment({appointment, modalAppointment, setAppointme
     return (
         <>
             <tr>
-                <td className="text-left py-2 px-4 border-b">{(user && user.admin || user.doctor) ? user_id.name : pet_id.name}</td>
-                <td className="text-left py-2 px-4 border-b">{(user && user.admin || user.doctor) ? pet_id.name : date }</td>
-                <td className="text-left py-2 px-4 border-b">{hour_id.hour}</td>
+                <td className="text-left py-2 px-4 border-b">
+                        {(user && user.admin) || user.doctor ? userName : petName}
+                </td>
+                <td className="text-left py-2 px-4 border-b">
+                    {(user && user.admin) || user.doctor ? petName : date}
+                </td>
+                <td className="text-left py-2 px-4 border-b">
+                    {hour}
+                </td>
                 <td className="text-left py-2 px-4 border-b">
                     {button}
                     {button2}
