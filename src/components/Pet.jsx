@@ -1,19 +1,27 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 //en este componente pasamos dos funciones, una para editar las mascotas y la otra para borrarlas
-export default function Pet({pets, modalPet, setPet, deletePets}) {
-    let url;
+export default function Pet({pets, modalPet, setPet, deletePets, setUrl}) {
+    let urlButton;
     const {user} = useAuth({})
-    const {name, sex} = pets
+    const {id, name, sex} = pets
     const { handleClickModalPet } = modalPet;
     const {handleSetPet} = setPet
-    const {deletePet} = deletePets
+    const {deleteData} = deletePets
+    const {url} = setUrl;
     let button;
     let button2;
 
+    //to delete
+    const handleDelete = () => {
+        deleteData({
+            urlAx: `api/pets/${id}`, 
+            urlD: url
+        });
+    }    
     //to urls and buttons
     if(user.admin) {
-        url = '/admin/userpet';
+        urlButton = '/admin/userpet';
         button = (
             <button 
                 onClick={() => {
@@ -25,14 +33,14 @@ export default function Pet({pets, modalPet, setPet, deletePets}) {
         );  
         button2 = (
             <button 
-                onClick={() => deletePet(pets.id)} 
+                onClick={handleDelete} 
                 className="bg-red-500 hover:bg-red-800 text-white px-2 py-1 rounded ml-2"
             >Eliminar</button>
         );
     } else if(user.doctor) {
-        url = '/doctor/userpet';
+        urlButton = '/doctor/userpet';
     } else {
-        url = '/userPet';
+        urlButton = '/userPet';
         button = (
             <button 
                 onClick={() => {
@@ -44,7 +52,7 @@ export default function Pet({pets, modalPet, setPet, deletePets}) {
         );
         button2 = (
             <button 
-                onClick={() => deletePet(pets.id)} 
+                onClick={handleDelete} 
                 className="bg-red-500 hover:bg-red-800 text-white px-2 py-1 rounded ml-2"
             >Eliminar</button>
         );
@@ -57,7 +65,7 @@ export default function Pet({pets, modalPet, setPet, deletePets}) {
                 <td className="py-2 px-4 border-b">
                     {button}
                     <Link
-                        to={url}
+                        to={urlButton}
                     >
                         <button 
                             onClick={() => {

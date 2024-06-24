@@ -3,26 +3,21 @@ import useAmorPorTi from "../../hooks/useAmorPorTi"
 import Button from "../../components/Button"
 import Pet from "../../components/Pet";
 import useSWR from "swr";
-import clienteAxios from "../../lib/axios";
+import { useEffect } from 'react';
 import Spinner from "../../components/Spinner";
 import { useAuth } from '../../hooks/useAuth';
+import {fetcher} from "../../hooks/Fetcher"
 export default function PetsUser() {
   const {user} = useAuth({});
-  let url;
+  let urlButton;
   let Pets;
-  const {handleSetPet, deletePet, handleClickModalPet, userId} = useAmorPorTi()
-  //fetcher
-  const fetcher = url => clienteAxios(url, {
-      headers: {
-          Authorization: `Bearer ${localStorage.getItem('AUTH_TOKEN')}`
-      }
-  }).then(res => res.data);
+  const {handleSetPet, deleteData, handleClickModalPet, userId, handleSetUrl, url} = useAmorPorTi()
+  useEffect(() => {
+      handleSetUrl(`api/pets?user_id=${userId}`);
+  },[handleSetUrl]);
   //obtener mascotas
   const { data: availablePetsData, error: availablePetsError, isLoading } = useSWR(
-      `api/pets?user_id=${userId}`, fetcher,
-      {
-        refreshInterval: 1000
-      }
+      url, fetcher
   );
   Pets = availablePetsData ? availablePetsData.data : [];
   // Check if the pets object is empty
@@ -31,9 +26,9 @@ export default function PetsUser() {
 
   //validate if the user is admin o doctor to show a button
     if(user.doctor) {
-        url = '/doctor/users';
+      urlButton = '/doctor/users';
     }else if(user.admin){
-        url = '/admin/usuarios';
+      urlButton = '/admin/usuarios';
     }
 
   if(isLoading) return(<Spinner />)
@@ -44,7 +39,7 @@ export default function PetsUser() {
             className=''
         >
             <Link
-                to={url}
+                to={urlButton}
             >
             <button
                 className="bg-customColor hover:bg-customColorShadow text-white px-2 py-1 rounded"
@@ -71,8 +66,9 @@ export default function PetsUser() {
                               key={pet.id}
                               pets={pet}
                               modalPet={{handleClickModalPet}}
-                              deletePets={{deletePet}}
+                              deletePets={{deleteData}}
                               setPet={{handleSetPet}}
+                              setUrl={{url}}
                           />
                       ))}
                   </tbody>

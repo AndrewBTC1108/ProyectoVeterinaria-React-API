@@ -9,82 +9,75 @@ const AmorPorTiProvider = ({children}) => {
     const [mascota, setMascota] = useState({})//empieza como un objeto vacio
     const [appointment, setAppointment] = useState({})
     const [userId, setUserId] = useState('')
+    const [url, setUrl] = useState('');
     //to modals
     const [modalPet, setModalPet] = useState({ isOpen: false, isEditing: false});
     const [ModalAppointment, setModalAppointment] = useState({isOpen: false, isEditing: false});
     const [ModalVaccine, setModalVaccine] = useState({isOpen: false});
     const [ModalDeworming, setModalDeworming] = useState({isOpen: false});
     /***********************************************Area Mascotas*********************************************************************/
-    //Crear Mascotas
-    const createPet = async ({setErrors, id = null, ...props}) => {
+    //Crear 
+    const createData = async ({ setErrors, urlAx, ...props }) => {
         //token
-        const token = localStorage.getItem('AUTH_TOKEN');
-        if(token){
-            try {
-                const {data} = await clienteAxios.post('api/pets', {...props, user_id: id},
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                )
-                //vaciar el arreglo de errores
-                setErrors([])
-                //recargar
-                await mutate('api/pets')
-                //cerrar el modal
-                handleCloseModalPet()
-                //añadimos la notificacion de exito
-                toast.success(data.message)
-            } catch (error) {
-                setErrors(error.response.data.errors)
-            }
-        }
-    }
-    //Actualizar Mascotas
-    const updatePet = async  (id, setErrors, name, birthDate, species, breed, color, sex) => {
         const token = localStorage.getItem('AUTH_TOKEN');
         if (token) {
             try {
-                const {data} = await clienteAxios.patch(`api/pets/${id}`, {
-                    name,
-                    birth_date: birthDate,
-                    species,
-                    breed,
-                    color,
-                    sex,
-                }, {
+                const { data } = await clienteAxios.post(urlAx, { ...props }, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 });
+                //vaciar el arreglo de errores
                 setErrors([]);
-                await mutate('api/pets')
-                //cerrar el modal
-                handleCloseModalPet()
-                toast.success(data.message);
-            } catch (error) {
-                if(error.response.data.errors.error){
-                    handleCloseModalAppointment();
-                    toast.error(error.response.data.errors.error[0])
-                }else {
-                    setErrors(error.response.data.errors);
+                //url por si no es creado por medio de modal
+                if (url) {
+                    await mutate(url);
+                    setUrl('');
                 }
+                //añadimos la notificacion de exito
+                toast.success(data.message);
+                return true;
+            } catch (error) {
+                setErrors(error.response.data.errors);
             }
         }
     };
-    //Eliminar Mascotas
-    const deletePet = async id => {
+    //Actualizar 
+    const updateData = async ({ setErrors, urlAx, ...props}) => {
+        const token = localStorage.getItem('AUTH_TOKEN');
+        if(token){
+            try {
+                const {data} = await clienteAxios.patch(urlAx, {...props},
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }   
+                });
+                //vaciar el arreglo de errores                   
+                setErrors([])
+                if (url) {
+                    await mutate(url);
+                    setUrl('');
+                }
+                //añadimos la notificacion de exito
+                toast.success(data.message)
+                return true
+            } catch (error) {
+                setErrors(error.response.data.errors);
+            }
+        }
+    }
+    //Eliminar
+    const deleteData = async ({urlAx, urlD}) => {
         const token = localStorage.getItem('AUTH_TOKEN');
         if(token) {
             try {
-                const {data} = await clienteAxios.delete(`api/pets/${id}`, {
+                const {data} = await clienteAxios.delete(urlAx, {
                     headers:{
                         Authorization: `Bearer ${token}`
                     }
                 })
-                await mutate('api/pets')
-                await mutate('api/appointments')
+                await mutate(urlD);
                 toast.success(data.message);
             } catch (error) {
                 console.log(error)
@@ -232,6 +225,9 @@ const AmorPorTiProvider = ({children}) => {
         }
     }
     /**********************************************************************************************************************************/
+    const handleSetUrl = url => {
+        setUrl(url);
+    }
     //arrow function para la edicion de mascotas
     const handleSetPet = mascota => {
         setMascota(mascota)
@@ -281,15 +277,17 @@ const AmorPorTiProvider = ({children}) => {
     return (
         <AmorPorTiContext.Provider
             value={{
+                handleSetUrl,
+                url,
                 mascota,
                 modalPet,
                 handleClickModalPet,
                 handleCloseModalPet,
                 handlesetIdUser,
                 userId,
-                createPet,
-                updatePet,
-                deletePet,
+                createData,
+                updateData,
+                deleteData,
                 handleSetPet,
                 createAppointment,
                 updateAppointment,

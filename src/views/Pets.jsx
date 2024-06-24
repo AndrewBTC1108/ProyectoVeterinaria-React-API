@@ -4,15 +4,18 @@ import Pet from "../components/Pet";
 import useSWR from "swr";
 import {fetcher} from "../hooks/Fetcher"
 import Spinner from "../components/Spinner";
+import { useEffect } from "react";
 
 export default function Pets() {
-    let Pets;
-    const {handleSetPet, deletePet, handleClickModalPet} = useAmorPorTi()
+    const {handleSetPet, deleteData, handleClickModalPet, handleSetUrl, url} = useAmorPorTi()
+    useEffect(() => {
+        handleSetUrl('api/pets');
+    },[handleSetUrl]);
     //Get pets
     const { data: availablePetsData, error: availablePetsError, isLoading } = useSWR(
-        'api/pets', fetcher
+        url, fetcher
     );
-    Pets = availablePetsData ? availablePetsData.data : [];
+    let Pets = availablePetsData ? availablePetsData.data : [];
     // check if the pets object is empty
     // make sure pets is defined before trying to access its properties.we add a null check before the line
     const hasPets = Object.values(Pets).length > 0;
@@ -37,8 +40,9 @@ export default function Pets() {
                                 key={pet.id}
                                 pets={pet}
                                 modalPet={{handleClickModalPet}}
-                                deletePets={{deletePet}}
+                                deletePets={{deleteData}}
                                 setPet={{handleSetPet}}
+                                setUrl={{url}}
                             />
                         ))}
                     </tbody>
